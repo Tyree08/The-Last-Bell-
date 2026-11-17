@@ -496,3 +496,99 @@ function gameLoop(timestamp) {
 
   requestAnimationFrame(gameLoop);
 }
+
+// MENU BUTTONS
+
+document.getElementById("newGame").addEventListener("click", () => {
+  showScreen("difficulty");
+});
+
+document.querySelectorAll("[data-difficulty]").forEach(button => {
+  button.addEventListener("click", () => {
+    startNewGame(button.dataset.difficulty);
+  });
+});
+
+document.getElementById("begin").addEventListener("click", beginGame);
+
+document.getElementById("continueGame").addEventListener("click", loadGame);
+
+document.getElementById("settingsButton").addEventListener("click", () => {
+  showScreen("settings");
+});
+
+document.getElementById("backFromSettings").addEventListener("click", () => {
+  showScreen("menu");
+});
+
+document.getElementById("soundToggle").addEventListener("change", event => {
+  soundOn = event.target.checked;
+});
+
+document.getElementById("restart").addEventListener("click", () => {
+  startNewGame(difficulty);
+});
+
+document.getElementById("playAgain").addEventListener("click", () => {
+  showScreen("difficulty");
+});
+
+document.getElementById("mainMenu").addEventListener("click", () => {
+  showScreen("menu");
+});
+
+document.getElementById("endingMenu").addEventListener("click", () => {
+  showScreen("menu");
+});
+
+// KEYBOARD CONTROLS
+
+window.addEventListener("keydown", event => {
+  keysDown[event.code] = true;
+
+  if (!gameRunning) return;
+
+  if (event.code === "KeyE" && !event.repeat) {
+    interact();
+  }
+
+  if (event.code === "KeyF" && !event.repeat) {
+    flashlight = !flashlight;
+    showMessage(flashlight ? "Flashlight on." : "Flashlight off.");
+    playTone(flashlight ? 400 : 180, 0.1);
+  }
+
+  if (event.code === "KeyC" && !event.repeat) {
+    crouching = !crouching;
+    showMessage(crouching ? "You crouch down." : "You stand up.");
+  }
+
+  if (event.code === "Escape") {
+    showMessage("Press the game screen to control the mouse again.");
+  }
+});
+
+window.addEventListener("keyup", event => {
+  keysDown[event.code] = false;
+});
+
+// MOUSE LOOK
+
+document.addEventListener("mousemove", event => {
+  if (gameRunning && document.pointerLockElement === canvas) {
+    player.angle += event.movementX * 0.0025;
+  }
+});
+
+canvas.addEventListener("click", () => {
+  if (gameRunning && document.pointerLockElement !== canvas) {
+    canvas.requestPointerLock?.();
+  }
+});
+
+// INITIAL MENU SETUP
+
+document.getElementById("continueGame").disabled =
+  !localStorage.getItem(SAVE_NAME);
+
+showMessage("Welcome to The Last Bell.", 3);

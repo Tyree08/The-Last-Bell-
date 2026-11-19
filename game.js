@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById("view");
 const ctx = canvas.getContext("2d");
 
@@ -481,7 +482,7 @@ function castRay(angle) {
   let side = 0;
   let hit = false;
 
-  // FIXED: Start distance at 0 so the raycasting loop can run.
+  // FIX: Start at zero so the raycasting loop can run.
   let distance = 0;
 
   while (!hit && distance < 20) {
@@ -558,7 +559,7 @@ function renderScene() {
 
     const top = (height - wallHeight) / 2;
 
-    // Brighter wall lighting
+    // BRIGHTER WALL LIGHTING
     let shade = Math.max(
       85,
       230 - correctedDistance * 14
@@ -645,7 +646,7 @@ function gameLoop(timestamp) {
 
   lastTime = timestamp;
 
-  // FIXED: Use the actual Shift key codes.
+  // FIX: Use the actual Shift key codes.
   const running = keysDown.ShiftLeft || keysDown.ShiftRight;
 
   const speed = crouching

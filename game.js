@@ -1,4 +1,3 @@
-alert("THE LAST BELL GAME.JS IS WORKING!");
 const canvas = document.getElementById("view");
 const ctx = canvas.getContext("2d");
 
@@ -746,43 +745,60 @@ document.getElementById("endingMenu").addEventListener(
 
 // KEYBOARD CONTROLS
 
-window.addEventListener("keydown", event => {
-  keysDown[event.code] = true;
 
+// FIXED KEYBOARD CONTROLS
+
+window.addEventListener("keydown", event => {
   if (!gameRunning) return;
 
-  if (event.code === "KeyE" && !event.repeat) {
+  const key = event.key.toLowerCase();
+
+  if (["w", "a", "s", "d", "arrowup", "arrowdown",
+       "arrowleft", "arrowright", "shift"].includes(key)) {
+    event.preventDefault();
+  }
+
+  keysDown[event.code] = true;
+
+  if (key === "e" && !event.repeat) {
     interact();
   }
 
-  if (event.code === "KeyF" && !event.repeat) {
+  if (key === "f" && !event.repeat) {
     flashlight = !flashlight;
-
-    showMessage(
-      flashlight ? "Flashlight on." : "Flashlight off."
-    );
-
-    playTone(flashlight ? 400 : 180, 0.1);
+    showMessage(flashlight ? "Flashlight on." : "Flashlight off.");
   }
 
-  if (event.code === "KeyC" && !event.repeat) {
+  if (key === "c" && !event.repeat) {
     crouching = !crouching;
-
-    showMessage(
-      crouching ? "You crouch down." : "You stand up."
-    );
-  }
-
-  if (event.code === "Escape") {
-    showMessage(
-      "Click the game screen to control the mouse again."
-    );
+    showMessage(crouching ? "You crouch down." : "You stand up.");
   }
 });
 
 window.addEventListener("keyup", event => {
   keysDown[event.code] = false;
 });
+
+window.addEventListener("blur", () => {
+  Object.keys(keysDown).forEach(key => {
+    keysDown[key] = false;
+  });
+});
+
+// MOUSE LOOK
+
+canvas.addEventListener("click", () => {
+  if (gameRunning && document.pointerLockElement !== canvas) {
+    canvas.requestPointerLock?.();
+  }
+});
+
+document.addEventListener("mousemove", event => {
+  if (gameRunning && document.pointerLockElement === canvas) {
+    player.angle += event.movementX * 0.003;
+  }
+});
+
 
 // MOUSE LOOK
 

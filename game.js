@@ -480,7 +480,9 @@ function castRay(angle) {
 
   let side = 0;
   let hit = false;
-  let distance = 20;
+
+  // FIXED: Start distance at 0 so the raycasting loop can run.
+  let distance = 0;
 
   while (!hit && distance < 20) {
     if (sideDistX < sideDistY) {
@@ -556,7 +558,7 @@ function renderScene() {
 
     const top = (height - wallHeight) / 2;
 
-    // BRIGHTER WALL LIGHTING
+    // Brighter wall lighting
     let shade = Math.max(
       85,
       230 - correctedDistance * 14
@@ -643,7 +645,9 @@ function gameLoop(timestamp) {
 
   lastTime = timestamp;
 
-  const running = keysDown.Shift;
+  // FIXED: Use the actual Shift key codes.
+  const running = keysDown.ShiftLeft || keysDown.ShiftRight;
+
   const speed = crouching
     ? 1.4
     : running
@@ -745,16 +749,17 @@ document.getElementById("endingMenu").addEventListener(
 
 // KEYBOARD CONTROLS
 
-
-// FIXED KEYBOARD CONTROLS
-
 window.addEventListener("keydown", event => {
   if (!gameRunning) return;
 
   const key = event.key.toLowerCase();
 
-  if (["w", "a", "s", "d", "arrowup", "arrowdown",
-       "arrowleft", "arrowright", "shift"].includes(key)) {
+  if ([
+    "w", "a", "s", "d",
+    "arrowup", "arrowdown",
+    "arrowleft", "arrowright",
+    "shift"
+  ].includes(key)) {
     event.preventDefault();
   }
 
@@ -796,27 +801,6 @@ canvas.addEventListener("click", () => {
 document.addEventListener("mousemove", event => {
   if (gameRunning && document.pointerLockElement === canvas) {
     player.angle += event.movementX * 0.003;
-  }
-});
-
-
-// MOUSE LOOK
-
-document.addEventListener("mousemove", event => {
-  if (
-    gameRunning &&
-    document.pointerLockElement === canvas
-  ) {
-    player.angle += event.movementX * 0.0025;
-  }
-});
-
-canvas.addEventListener("click", () => {
-  if (
-    gameRunning &&
-    document.pointerLockElement !== canvas
-  ) {
-    canvas.requestPointerLock?.();
   }
 });
 

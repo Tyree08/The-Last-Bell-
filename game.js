@@ -74,6 +74,291 @@ const keysDown = {};
 const FOV = Math.PI / 3;
 const SAVE_NAME = "theLastBellSave";
 
+
+// SCHOOL FURNITURE AND DECORATIONS
+
+const schoolProps = [
+  { x: 1.55, y: 2.6, type: "lockers" },
+  { x: 1.55, y: 3.7, type: "lockers" },
+  { x: 3.4, y: 2.55, type: "desk" },
+  { x: 3.5, y: 3.75, type: "chair" },
+  { x: 7.5, y: 2.55, type: "desk" },
+  { x: 8.6, y: 3.65, type: "desk" },
+  { x: 10.35, y: 2.6, type: "lockers" },
+  { x: 10.35, y: 3.8, type: "lockers" },
+  { x: 2.5, y: 4.55, type: "trash" },
+  { x: 8.8, y: 4.55, type: "fountain" },
+  { x: 1.55, y: 6.5, type: "lockers" },
+  { x: 5.5, y: 6.5, type: "desk" },
+  { x: 7.4, y: 6.5, type: "chair" },
+  { x: 10.35, y: 6.5, type: "clock" },
+  { x: 1.55, y: 8.5, type: "poster" },
+  { x: 3.4, y: 8.5, type: "trash" },
+  { x: 6.5, y: 8.5, type: "desk" },
+  { x: 8.5, y: 8.5, type: "cabinet" },
+  { x: 10.35, y: 8.5, type: "lockers" },
+  { x: 2.5, y: 10.35, type: "fountain" },
+  { x: 7.5, y: 10.35, type: "poster" }
+];
+
+const propCanvases = {};
+
+function makePropSprite(type) {
+  const sprite = document.createElement("canvas");
+  sprite.width = 100;
+  sprite.height = 120;
+  const g = sprite.getContext("2d");
+
+  // Soft shadow
+  g.fillStyle = "rgba(0,0,0,0.35)";
+  g.beginPath();
+  g.ellipse(50, 111, 37, 7, 0, 0, Math.PI * 2);
+  g.fill();
+
+  if (type === "lockers") {
+    for (let i = 0; i < 2; i++) {
+      const x = 12 + i * 39;
+
+      g.fillStyle = "#34434a";
+      g.fillRect(x, 17, 35, 91);
+
+      g.fillStyle = "#617078";
+      g.fillRect(x + 3, 20, 29, 84);
+
+      g.fillStyle = "#29343a";
+      g.fillRect(x + 7, 28, 21, 3);
+      g.fillRect(x + 7, 35, 21, 3);
+
+      g.fillStyle = "#d0b879";
+      g.fillRect(x + 27, 57, 3, 9);
+
+      g.strokeStyle = "#1b252a";
+      g.lineWidth = 2;
+      g.strokeRect(x, 17, 35, 91);
+    }
+
+  } else if (type === "desk") {
+    g.fillStyle = "#68452e";
+    g.fillRect(10, 48, 80, 12);
+
+    g.fillStyle = "#9a6b43";
+    g.fillRect(13, 43, 74, 9);
+
+    g.fillStyle = "#3a302a";
+    g.fillRect(17, 60, 7, 45);
+    g.fillRect(76, 60, 7, 45);
+
+    g.fillStyle = "#b7b0a0";
+    g.fillRect(27, 39, 24, 4);
+
+    g.fillStyle = "#d7d0bf";
+    g.fillRect(57, 36, 17, 7);
+
+  } else if (type === "chair") {
+    g.fillStyle = "#34434a";
+    g.fillRect(26, 34, 48, 43);
+
+    g.fillStyle = "#64747a";
+    g.fillRect(30, 38, 40, 34);
+
+    g.fillStyle = "#30383b";
+    g.fillRect(25, 75, 50, 9);
+    g.fillRect(31, 84, 6, 25);
+    g.fillRect(64, 84, 6, 25);
+
+  } else if (type === "trash") {
+    g.fillStyle = "#303b3d";
+    g.beginPath();
+    g.moveTo(27, 42);
+    g.lineTo(73, 42);
+    g.lineTo(67, 105);
+    g.lineTo(33, 105);
+    g.closePath();
+    g.fill();
+
+    g.fillStyle = "#687476";
+    g.fillRect(23, 35, 54, 9);
+
+    g.strokeStyle = "#1d292b";
+    g.lineWidth = 3;
+    g.strokeRect(34, 52, 5, 43);
+    g.strokeRect(48, 52, 5, 43);
+    g.strokeRect(62, 52, 5, 43);
+
+  } else if (type === "fountain") {
+    g.fillStyle = "#66777b";
+    g.fillRect(20, 49, 60, 55);
+
+    g.fillStyle = "#aab8b7";
+    g.fillRect(15, 42, 70, 12);
+
+    g.fillStyle = "#34474b";
+    g.fillRect(34, 30, 32, 13);
+
+    g.fillStyle = "#b8d0d0";
+    g.fillRect(43, 34, 14, 5);
+
+    g.fillStyle = "#26383b";
+    g.fillRect(46, 56, 8, 6);
+
+  } else if (type === "clock") {
+    g.fillStyle = "#4d3830";
+    g.fillRect(17, 14, 66, 66);
+
+    g.fillStyle = "#d9d2bd";
+    g.beginPath();
+    g.arc(50, 47, 27, 0, Math.PI * 2);
+    g.fill();
+
+    g.strokeStyle = "#34302b";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.arc(50, 47, 27, 0, Math.PI * 2);
+    g.stroke();
+
+    g.strokeStyle = "#282622";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(50, 47);
+    g.lineTo(50, 29);
+    g.moveTo(50, 47);
+    g.lineTo(64, 53);
+    g.stroke();
+
+    g.fillStyle = "#282622";
+    g.beginPath();
+    g.arc(50, 47, 3, 0, Math.PI * 2);
+    g.fill();
+
+  } else if (type === "poster") {
+    g.fillStyle = "#493d31";
+    g.fillRect(12, 12, 76, 94);
+
+    g.fillStyle = "#e0d6bd";
+    g.fillRect(17, 17, 66, 84);
+
+    g.fillStyle = "#7c3434";
+    g.fillRect(24, 25, 52, 15);
+
+    g.fillStyle = "#343b3a";
+    g.font = "bold 8px Arial";
+    g.textAlign = "center";
+    g.fillText("SCHOOL", 50, 36);
+
+    g.fillStyle = "#596d63";
+    g.fillRect(27, 49, 46, 4);
+    g.fillRect(27, 59, 39, 4);
+    g.fillRect(27, 69, 43, 4);
+
+    g.fillStyle = "#8d4037";
+    g.fillRect(39, 82, 22, 10);
+
+  } else if (type === "cabinet") {
+    g.fillStyle = "#4b4038";
+    g.fillRect(15, 26, 70, 82);
+
+    g.fillStyle = "#766456";
+    g.fillRect(19, 30, 62, 74);
+
+    g.strokeStyle = "#332b27";
+    g.lineWidth = 3;
+    g.strokeRect(19, 30, 62, 74);
+
+    g.beginPath();
+    g.moveTo(50, 30);
+    g.lineTo(50, 104);
+    g.stroke();
+
+    g.fillStyle = "#c0a66e";
+    g.fillRect(44, 62, 4, 10);
+    g.fillRect(53, 62, 4, 10);
+  }
+
+  return sprite;
+}
+
+
+// DRAW SCHOOL FURNITURE
+
+function drawSchoolProps(depthBuffer) {
+  const width = canvas.width;
+  const height = canvas.height;
+
+  const visibleProps = schoolProps.map(prop => {
+    const dx = prop.x - player.x;
+    const dy = prop.y - player.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    let angle = Math.atan2(dy, dx) - player.angle;
+
+    while (angle > Math.PI) angle -= Math.PI * 2;
+    while (angle < -Math.PI) angle += Math.PI * 2;
+
+    return {
+      prop,
+      distance,
+      angle,
+      depth: distance * Math.cos(angle)
+    };
+
+  }).filter(item =>
+    item.depth > 0.15 &&
+    Math.abs(item.angle) < FOV * 0.8
+  ).sort((a, b) => b.depth - a.depth);
+
+  for (const item of visibleProps) {
+    const sprite = propCanvases[item.prop.type] ||
+      (propCanvases[item.prop.type] =
+        makePropSprite(item.prop.type));
+
+    const screenX =
+      width / 2 +
+      (Math.tan(item.angle) / Math.tan(FOV / 2)) *
+      (width / 2);
+
+    const spriteHeight = Math.min(
+      height * 1.5,
+      height * 0.82 / Math.max(item.depth, 0.2)
+    );
+
+    const spriteWidth =
+      spriteHeight * (sprite.width / sprite.height);
+
+    const left = Math.round(screenX - spriteWidth / 2);
+
+    const top = Math.round(
+      height / 2 - spriteHeight / 2 +
+      spriteHeight * 0.08
+    );
+
+    const right = Math.round(left + spriteWidth);
+
+    // Hide furniture behind walls.
+    for (
+      let screenColumn = Math.max(0, left);
+      screenColumn < Math.min(width, right);
+      screenColumn++
+    ) {
+      if (item.depth >= depthBuffer[screenColumn]) {
+        continue;
+      }
+
+      const sourceX = Math.floor(
+        ((screenColumn - left) / spriteWidth) *
+        sprite.width
+      );
+
+      ctx.drawImage(
+        sprite,
+        sourceX, 0, 1, sprite.height,
+        screenColumn, top, 1, spriteHeight
+      );
+    }
+  }
+}
+
+
 // SHOW SCREENS
 
 function showScreen(id) {
@@ -86,14 +371,18 @@ function showScreen(id) {
   }
 }
 
+
 // DISPLAY MESSAGES
 
 function showMessage(text, seconds = 3) {
   const box = document.getElementById("message");
+
   box.textContent = text;
   box.classList.remove("hidden");
+
   messageTimer = seconds;
 }
+
 
 // SOUND EFFECTS
 
@@ -123,10 +412,12 @@ function playTone(frequency = 120, duration = 0.12) {
     );
 
     oscillator.stop(audioContext.currentTime + duration);
+
   } catch (error) {
     // Game continues if browser audio is unavailable.
   }
 }
+
 
 // START A NEW GAME
 
@@ -164,15 +455,17 @@ function startNewGame(selectedDifficulty) {
     "A few minutes later, the lights begin to flicker.";
 
   updateHUD();
+
   showMessage("The school is quiet. Too quiet.", 5);
 }
+
 
 // ENTER THE SCHOOL
 
 function beginGame() {
   showScreen(null);
-  gameRunning = true;
 
+  gameRunning = true;
   lastTime = performance.now();
 
   canvas.requestPointerLock?.();
@@ -181,6 +474,7 @@ function beginGame() {
 
   requestAnimationFrame(gameLoop);
 }
+
 
 // CHECK WALL COLLISIONS
 
@@ -209,6 +503,7 @@ function canMove(x, y) {
   );
 }
 
+
 // MOVE PLAYER
 
 function movePlayer(dx, dy) {
@@ -220,6 +515,7 @@ function movePlayer(dx, dy) {
     player.y += dy;
   }
 }
+
 
 // UPDATE INFORMATION ON SCREEN
 
@@ -245,6 +541,7 @@ function updateHUD() {
         : "Chapter 1: Before Midnight";
 }
 
+
 // SAVE GAME
 
 function saveGame() {
@@ -262,6 +559,7 @@ function saveGame() {
 
   document.getElementById("continueGame").disabled = false;
 }
+
 
 // LOAD SAVED GAME
 
@@ -310,6 +608,7 @@ function loadGame() {
     showMessage("Your saved game could not be loaded.");
   }
 }
+
 
 // INTERACT WITH OBJECTS
 
@@ -369,6 +668,7 @@ function interact() {
   saveGame();
 }
 
+
 // WIN THE GAME
 
 function finishGame() {
@@ -390,6 +690,7 @@ function finishGame() {
   playTone(620, 0.5);
 }
 
+
 // GAME OVER
 
 function caught() {
@@ -408,6 +709,7 @@ function caught() {
 
   playTone(55, 0.6);
 }
+
 
 // MONSTER MOVEMENT
 
@@ -446,6 +748,7 @@ function updateMonster(delta) {
   }
 }
 
+
 // RAYCASTING
 
 function castRay(angle) {
@@ -482,7 +785,7 @@ function castRay(angle) {
   let side = 0;
   let hit = false;
 
-  // FIX: Start at zero so the raycasting loop can run.
+  // Start at zero so the raycasting loop can run.
   let distance = 0;
 
   while (!hit && distance < 20) {
@@ -514,6 +817,7 @@ function castRay(angle) {
   };
 }
 
+
 // DRAW THE SCHOOL ENVIRONMENT
 
 function renderScene() {
@@ -542,6 +846,9 @@ function renderScene() {
   ctx.fillStyle = floor;
   ctx.fillRect(0, height / 2, width, height / 2);
 
+  // Store wall distances so furniture can be hidden behind walls.
+  const depthBuffer = new Array(width);
+
   // Draw hallway walls
   for (let x = 0; x < width; x++) {
     const rayAngle =
@@ -552,6 +859,8 @@ function renderScene() {
     const correctedDistance =
       ray.distance * Math.cos(rayAngle - player.angle);
 
+    depthBuffer[x] = correctedDistance;
+
     const wallHeight = Math.min(
       height,
       height / Math.max(correctedDistance, 0.1)
@@ -559,7 +868,7 @@ function renderScene() {
 
     const top = (height - wallHeight) / 2;
 
-    // BRIGHTER WALL LIGHTING
+    // Brighter wall lighting
     let shade = Math.max(
       85,
       230 - correctedDistance * 14
@@ -580,6 +889,9 @@ function renderScene() {
 
     ctx.fillRect(x, top, 1, wallHeight);
   }
+
+  // Draw school furniture and wall decorations.
+  drawSchoolProps(depthBuffer);
 
   // Red warning glow when the threat is nearby
   const monsterDistance = Math.hypot(
@@ -634,6 +946,7 @@ function renderScene() {
   }
 }
 
+
 // MAIN GAME LOOP
 
 function gameLoop(timestamp) {
@@ -646,8 +959,9 @@ function gameLoop(timestamp) {
 
   lastTime = timestamp;
 
-  // FIX: Use the actual Shift key codes.
-  const running = keysDown.ShiftLeft || keysDown.ShiftRight;
+  // Use the actual Shift key codes.
+  const running =
+    keysDown.ShiftLeft || keysDown.ShiftRight;
 
   const speed = crouching
     ? 1.4
@@ -688,6 +1002,7 @@ function gameLoop(timestamp) {
 
   requestAnimationFrame(gameLoop);
 }
+
 
 // MENU BUTTONS
 
@@ -748,6 +1063,7 @@ document.getElementById("endingMenu").addEventListener(
   () => showScreen("menu")
 );
 
+
 // KEYBOARD CONTROLS
 
 window.addEventListener("keydown", event => {
@@ -772,12 +1088,18 @@ window.addEventListener("keydown", event => {
 
   if (key === "f" && !event.repeat) {
     flashlight = !flashlight;
-    showMessage(flashlight ? "Flashlight on." : "Flashlight off.");
+
+    showMessage(
+      flashlight ? "Flashlight on." : "Flashlight off."
+    );
   }
 
   if (key === "c" && !event.repeat) {
     crouching = !crouching;
-    showMessage(crouching ? "You crouch down." : "You stand up.");
+
+    showMessage(
+      crouching ? "You crouch down." : "You stand up."
+    );
   }
 });
 
@@ -790,6 +1112,7 @@ window.addEventListener("blur", () => {
     keysDown[key] = false;
   });
 });
+
 
 // MOUSE LOOK
 
@@ -804,6 +1127,7 @@ document.addEventListener("mousemove", event => {
     player.angle += event.movementX * 0.003;
   }
 });
+
 
 // INITIAL MENU SETUP
 

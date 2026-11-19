@@ -359,6 +359,277 @@ function drawSchoolProps(depthBuffer) {
 }
 
 
+// SCHOOL DECORATIONS
+
+const schoolProps = [
+  // Lockers in the starting hallway
+  { x: 3.5, y: 1.9, type: "lockers" },
+  { x: 4.5, y: 1.9, type: "lockers" },
+
+  // Classroom furniture
+  { x: 3.5, y: 2.6, type: "desk" },
+  { x: 7.5, y: 2.6, type: "desk" },
+  { x: 8.5, y: 3.6, type: "chair" },
+
+  // Hallway decorations
+  { x: 2.5, y: 4.5, type: "trash" },
+  { x: 8.5, y: 4.5, type: "fountain" },
+  { x: 1.5, y: 6.5, type: "lockers" },
+  { x: 5.5, y: 6.5, type: "desk" },
+  { x: 7.5, y: 6.5, type: "chair" },
+  { x: 10.4, y: 6.5, type: "clock" },
+
+  // More school decorations
+  { x: 1.5, y: 8.5, type: "poster" },
+  { x: 3.5, y: 8.5, type: "trash" },
+  { x: 6.5, y: 8.5, type: "desk" },
+  { x: 8.5, y: 8.5, type: "cabinet" },
+  { x: 10.4, y: 8.5, type: "lockers" },
+  { x: 2.5, y: 10.4, type: "fountain" }
+];
+
+function drawSchoolProps(depthBuffer) {
+  const width = canvas.width;
+  const height = canvas.height;
+
+  for (const prop of schoolProps) {
+    const dx = prop.x - player.x;
+    const dy = prop.y - player.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    let angle = Math.atan2(dy, dx) - player.angle;
+
+    while (angle > Math.PI) angle -= Math.PI * 2;
+    while (angle < -Math.PI) angle += Math.PI * 2;
+
+    if (Math.abs(angle) > FOV / 2) continue;
+
+    const depth = distance * Math.cos(angle);
+
+    if (depth <= 0.2) continue;
+
+    const screenX =
+      width / 2 +
+      (angle / (FOV / 2)) * (width / 2);
+
+    const spriteHeight = Math.min(
+      height * 0.9,
+      height * 0.48 / depth
+    );
+
+    const spriteWidth = spriteHeight * 0.85;
+
+    const left = Math.floor(screenX - spriteWidth / 2);
+    const top = Math.floor(height / 2 - spriteHeight / 2);
+    const right = Math.ceil(screenX + spriteWidth / 2);
+
+    // Draw each decoration
+    for (
+      let x = Math.max(0, left);
+      x < Math.min(width, right);
+      x++
+    ) {
+      if (depth >= depthBuffer[x]) continue;
+
+      const relativeX = (x - left) / spriteWidth;
+
+      const spriteX = Math.floor(relativeX * 100);
+
+      const spriteY = 0;
+      const spriteHeightSource = 120;
+
+      const sprite = propSprites[prop.type];
+
+      if (!sprite) continue;
+
+      ctx.drawImage(
+        sprite,
+        spriteX, spriteY, 1, spriteHeightSource,
+        x, top, 1, spriteHeight
+      );
+    }
+  }
+}
+
+
+// CREATE THE DECORATION PICTURES
+
+const propSprites = {};
+
+function createProp(type, drawFunction) {
+  const sprite = document.createElement("canvas");
+
+  sprite.width = 100;
+  sprite.height = 120;
+
+  const g = sprite.getContext("2d");
+
+  drawFunction(g);
+
+  propSprites[type] = sprite;
+}
+
+
+// LOCKERS
+
+createProp("lockers", g => {
+  for (let i = 0; i < 2; i++) {
+    const x = 10 + i * 42;
+
+    g.fillStyle = "#52636b";
+    g.fillRect(x, 8, 38, 105);
+
+    g.fillStyle = "#34434a";
+    g.fillRect(x + 4, 12, 30, 97);
+
+    g.fillStyle = "#202c31";
+    g.fillRect(x + 9, 24, 20, 3);
+    g.fillRect(x + 9, 33, 20, 3);
+
+    g.fillStyle = "#c4a96d";
+    g.fillRect(x + 28, 58, 3, 10);
+  }
+});
+
+
+// CLASSROOM DESK
+
+createProp("desk", g => {
+  g.fillStyle = "#805735";
+  g.fillRect(8, 48, 84, 14);
+
+  g.fillStyle = "#a77848";
+  g.fillRect(12, 43, 76, 9);
+
+  g.fillStyle = "#38302a";
+  g.fillRect(18, 62, 7, 48);
+  g.fillRect(75, 62, 7, 48);
+
+  g.fillStyle = "#ded5c3";
+  g.fillRect(30, 36, 35, 6);
+});
+
+
+// CHAIR
+
+createProp("chair", g => {
+  g.fillStyle = "#42545c";
+  g.fillRect(24, 35, 52, 42);
+
+  g.fillStyle = "#657b83";
+  g.fillRect(29, 40, 42, 32);
+
+  g.fillStyle = "#30383b";
+  g.fillRect(23, 77, 54, 8);
+  g.fillRect(30, 85, 6, 30);
+  g.fillRect(64, 85, 6, 30);
+});
+
+
+// TRASH CAN
+
+createProp("trash", g => {
+  g.fillStyle = "#303b3d";
+  g.fillRect(27, 42, 46, 67);
+
+  g.fillStyle = "#718084";
+  g.fillRect(22, 36, 56, 9);
+
+  g.strokeStyle = "#202a2d";
+  g.lineWidth = 3;
+
+  g.strokeRect(34, 52, 5, 45);
+  g.strokeRect(48, 52, 5, 45);
+  g.strokeRect(62, 52, 5, 45);
+});
+
+
+// WATER FOUNTAIN
+
+createProp("fountain", g => {
+  g.fillStyle = "#788a8d";
+  g.fillRect(18, 45, 64, 65);
+
+  g.fillStyle = "#b4c4c2";
+  g.fillRect(13, 39, 74, 12);
+
+  g.fillStyle = "#34474b";
+  g.fillRect(34, 27, 32, 15);
+
+  g.fillStyle = "#c4d7d3";
+  g.fillRect(44, 31, 12, 5);
+});
+
+
+// WALL CLOCK
+
+createProp("clock", g => {
+  g.fillStyle = "#ded6c0";
+  g.beginPath();
+  g.arc(50, 55, 35, 0, Math.PI * 2);
+  g.fill();
+
+  g.strokeStyle = "#38332c";
+  g.lineWidth = 5;
+  g.stroke();
+
+  g.beginPath();
+  g.moveTo(50, 55);
+  g.lineTo(50, 30);
+  g.moveTo(50, 55);
+  g.lineTo(70, 62);
+  g.stroke();
+});
+
+
+// SCHOOL POSTER
+
+createProp("poster", g => {
+  g.fillStyle = "#513e32";
+  g.fillRect(10, 10, 80, 100);
+
+  g.fillStyle = "#e5dcc5";
+  g.fillRect(16, 16, 68, 88);
+
+  g.fillStyle = "#873e37";
+  g.fillRect(23, 26, 54, 15);
+
+  g.fillStyle = "#303a39";
+  g.font = "bold 9px Arial";
+  g.textAlign = "center";
+  g.fillText("SCHOOL", 50, 37);
+
+  g.fillStyle = "#687a69";
+  g.fillRect(26, 52, 48, 5);
+  g.fillRect(26, 64, 42, 5);
+  g.fillRect(26, 76, 46, 5);
+});
+
+
+// CABINET
+
+createProp("cabinet", g => {
+  g.fillStyle = "#655044";
+  g.fillRect(12, 20, 76, 90);
+
+  g.fillStyle = "#887263";
+  g.fillRect(18, 26, 64, 78);
+
+  g.strokeStyle = "#332b27";
+  g.lineWidth = 3;
+  g.strokeRect(18, 26, 64, 78);
+
+  g.beginPath();
+  g.moveTo(50, 26);
+  g.lineTo(50, 104);
+  g.stroke();
+
+  g.fillStyle = "#d0b477";
+  g.fillRect(44, 60, 4, 10);
+  g.fillRect(53, 60, 4, 10);
+});
+
 // SHOW SCREENS
 
 function showScreen(id) {
@@ -820,9 +1091,12 @@ function castRay(angle) {
 
 // DRAW THE SCHOOL ENVIRONMENT
 
+
 function renderScene() {
   const width = canvas.width;
   const height = canvas.height;
+
+  const depthBuffer = new Array(width);
 
   // Ceiling
   const ceiling = ctx.createLinearGradient(
@@ -845,6 +1119,93 @@ function renderScene() {
 
   ctx.fillStyle = floor;
   ctx.fillRect(0, height / 2, width, height / 2);
+
+  // Draw walls
+  for (let x = 0; x < width; x++) {
+    const rayAngle =
+      player.angle - FOV / 2 + (x / width) * FOV;
+
+    const ray = castRay(rayAngle);
+
+    const correctedDistance =
+      ray.distance * Math.cos(rayAngle - player.angle);
+
+    depthBuffer[x] = correctedDistance;
+
+    const wallHeight = Math.min(
+      height,
+      height / Math.max(correctedDistance, 0.1)
+    );
+
+    const top = (height - wallHeight) / 2;
+
+    let shade = Math.max(
+      85,
+      230 - correctedDistance * 14
+    );
+
+    if (ray.side === 1) shade *= 0.85;
+    if (!flashlight) shade *= 0.65;
+
+    shade = Math.min(230, shade);
+
+    ctx.fillStyle =
+      `rgb(${shade}, ${shade * 0.88}, ${shade * 0.82})`;
+
+    ctx.fillRect(x, top, 1, wallHeight);
+  }
+
+  // Draw the school furniture.
+  drawSchoolProps(depthBuffer);
+
+  // Threat warning glow
+  const monsterDistance = Math.hypot(
+    monster.x - player.x,
+    monster.y - player.y
+  );
+
+  if (monsterDistance < 4) {
+    const danger = ctx.createRadialGradient(
+      width / 2,
+      height / 2,
+      10,
+      width / 2,
+      height / 2,
+      width * 0.7
+    );
+
+    danger.addColorStop(0, "rgba(110, 0, 0, 0)");
+    danger.addColorStop(
+      1,
+      `rgba(130, 0, 0, ${0.35 / monsterDistance})`
+    );
+
+    ctx.fillStyle = danger;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  // Flashlight
+  if (flashlight) {
+    const light = ctx.createRadialGradient(
+      width / 2,
+      height / 2,
+      35,
+      width / 2,
+      height / 2,
+      width * 0.65
+    );
+
+    light.addColorStop(0, "rgba(0,0,0,0)");
+    light.addColorStop(1, "rgba(0,0,0,0.35)");
+
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(0, 0, width, height);
+  }
+}
+
 
   // Store wall distances so furniture can be hidden behind walls.
   const depthBuffer = new Array(width);

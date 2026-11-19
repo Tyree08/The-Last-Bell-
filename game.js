@@ -1,4 +1,4 @@
-
+alert("THE LAST BELL GAME.JS IS WORKING!");
 // FIXED KEYBOARD CONTROLS
 
 canvas.tabIndex = 0;
